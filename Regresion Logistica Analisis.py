@@ -56,7 +56,6 @@ def descenso_gradiente(X, Y, w, b, learning_rate, epocas,
     
   #Guardar parámetros
   parametros = {"w":w, "b":b}
-  #gradientes = {"wGrad":wGrad, "bGrad":bGrad}
   return parametros, costos
 
 def predecir(w, b, X):
