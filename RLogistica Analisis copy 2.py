@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix, accuracy_score, precision_score
+from sklearn.metrics import accuracy_score, precision_score
 
 def sigmoide(Z):#Z entrada lineal
   """Función sigmoide"""
@@ -92,11 +92,9 @@ def regresion_logistica(entrenaX, entrenaY, pruebaX, pruebaY, epocas=2000,
   prediccionPrueba = predecir(w, b, pruebaX)
   prediccionEntrena = predecir(w, b, entrenaX)
 
-  #Imprimir la precisión
+  #Calcular la precisión
   precisionEntrena = 100-np.mean((np.abs(prediccionEntrena-entrenaY))*100)
   precisionPruebas = 100-np.mean((np.abs(prediccionPrueba-pruebaY))*100)
-  #print(f"Precisión en el conjunto de entrenamiento: {precisionEntrena}")
-  #print(f"Precisión en el conjunto de pruebas: {precisionPruebas}")
 
   #Guardar los resultados
   resultados = {"costos":costos,
@@ -189,14 +187,16 @@ def main():
     plt.title(f"Learning Rate = {resultado['learningRate']}")
     plt.show()
 
-    #New iteration around Maxx
+    #Generar nuevos rangos entre los hiper parametros
+    #Rango de learning rates
     maxLeftLR = maxx[1] - .05
     maxRightLR = maxx[1] + .05
     rangeLR1 = np.linspace(maxLeftLR, maxx[1], num=10)
     rangeLR2 = np.linspace(maxx[1],maxRightLR, num=10)
     rangeLR3 = [y for x in [rangeLR1, rangeLR2] for y in x]
-    rangeLR3 = list(dict.fromkeys(rangeLR3))
+    rangeLR3 = list(dict.fromkeys(rangeLR3))#Eliminar repetidos
 
+    #Rango de épocas
     maxLeftEpoc = maxx[2] - 20
     maxRightEpoc = maxx[2] + 20
     rangeEpoc1 = np.linspace(maxLeftEpoc, maxx[2], num=20)
@@ -204,7 +204,7 @@ def main():
     rangeEpoc2 = np.linspace(maxx[2], maxRightEpoc, num=10)
     rangeEpoc2 = [int(i) for i in rangeEpoc2]
     rangeEpoc3 = [y for x in [rangeEpoc1, rangeEpoc2] for y in x]
-    rangeEpoc3 = list(dict.fromkeys(rangeEpoc3))
+    rangeEpoc3 = list(dict.fromkeys(rangeEpoc3)) #Eliminar repetidos
 
     #Nueva iteración Coarse to fine
     maxx1 = [-1000, 0]
@@ -215,18 +215,15 @@ def main():
         if resultado["precisionEntrenamiento"] > maxx1[0]:
             maxx1 = [resultado["precisionEntrenamiento"], alpha, epoca]
 
-
+    #Escoger los hiper parametros (1ra iteración y con coarse to fine)
+    #que tuvieron un mejor precision
     best_hyperparameters = maxx if maxx[0] > maxx1[0] else maxx1
     print(best_hyperparameters)
     _, alpha, epoca = best_hyperparameters
 
-    #Now try it with the test
-    w, b = iniciar_pesos_cero(X_train.shape[0])
-    parametros, costos = descenso_gradiente(X_train, y_train, resultado["w"], 
-                                            resultado["b"], alpha, epoca)
-    #Devolver parámetros
-    w = parametros["w"]
-    b = parametros["b"]
+    
+    w = resultado["w"]
+    b = resultado["b"]
 
     #Predecir con conjunto test y graficar
     _, axis = plt.subplots(2, 2)
@@ -268,15 +265,6 @@ def main():
     plt.xlabel("Epocas (cada 100)")
     plt.title(f"Learning Rate = {resultado['learningRate']}")
     plt.show()
-
-
-#Separar info en 3
-#Hacer pruebas con train y validation
-#   Hacer 3 pruebas con diferentes learning rates
-#   Hacer 3 pruebas con diferentes epocas
-#Hacer pruebas con test
-#   Hacer 3 pruebas con diferentes learning rates
-#   Hacer 3 pruebas con diferentes epocas
 
 if __name__ == "__main__":
     main()
